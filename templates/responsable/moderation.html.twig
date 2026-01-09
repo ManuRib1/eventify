@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modération des avis{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">
+    <i class="bi bi-shield-check"></i> Modération des avis
+</h1>
+
+{% if avis_en_attente is empty %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> Aucun avis en attente de modération !
+    </div>
+{% else %}
+    <p class="text-muted">
+        {{ avis_en_attente|length }} avis en attente de validation
+    </p>
+
+    {% for avis in avis_en_attente %}
+    <div class="card mb-3 border-warning">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>
+                <strong>Événement :</strong> {{ avis.evenement.titre }}
+            </span>
+            <span class="badge bg-warning text-dark">En attente</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h5>{{ avis.utilisateur.prenom }} {{ avis.utilisateur.nom }}</h5>
+                    <p class="text-warning mb-2">
+                        Note : 
+                        {% for i in 1..avis.note %}
+                            ⭐
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">{{ avis.commentaire }}</p>
+                    <small class="text-muted">
+                        Publié le {{ avis.creerLe|date('d/m/Y à H:i') }}
+                        {% if avis.modifierLe %}
+                            - Modifié le {{ avis.modifierLe|date('d/m/Y à H:i') }}
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="col-md-4 text-end">
+                    <form method="post" action="{{ path('app_avis_moderate', {'id': avis.id}) }}" class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token('moderate' ~ avis.id) }}">
+                        <button type="submit" class="btn btn-success btn-lg mb-2 w-100">
+                            <i class="bi bi-check-circle"></i> Accepter
+                        </button>
+                    </form>
+                    
+                    <form method="post" 
+                          action="{{ path('app_avis_delete', {'id': avis.id}) }}"
+                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avis ?');"
+                          class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avis.id) }}">
+                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

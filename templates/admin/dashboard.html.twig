@@ -1,0 +1,71 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block main %}
+<div class="container-fluid">
+    <h1 class="mt-4 mb-4">
+        <i class="fa fa-dashboard"></i> Administration - Relais & Châteaux
+    </h1>
+
+    <div class="alert alert-info">
+        <h4><i class="fa fa-info-circle"></i> Bienvenue dans l'interface d'administration</h4>
+        <p class="mb-0">Utilisez le <strong>menu de gauche</strong> pour gérer les utilisateurs, événements et avis.</p>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <i class="fa fa-users fa-4x mb-3"></i>
+                    <h3>Utilisateurs</h3>
+                    <p>Gérer tous les utilisateurs de la plateforme</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <i class="fa fa-calendar fa-4x mb-3"></i>
+                    <h3>Événements</h3>
+                    <p>Gérer les événements et leurs détails</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <i class="fa fa-star fa-4x mb-3"></i>
+                    <h3>Avis</h3>
+                    <p>Modérer et gérer les avis clients</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fa fa-question-circle"></i> Comment utiliser l'administration ?</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Utilisez le <strong>menu à gauche</strong> pour naviguer entre les sections</li>
+                        <li>Cliquez sur <strong>"Utilisateurs"</strong> pour voir et modifier les utilisateurs</li>
+                        <li>Cliquez sur <strong>"Événements"</strong> pour gérer les événements</li>
+                        <li>Cliquez sur <strong>"Avis"</strong> pour modérer les avis en attente</li>
+                    </ol>
+                    <hr>
+                    <a href="{{ path('app_home') }}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Retour au site
+                    </a>
+                    <a href="{{ path('app_responsable_moderation') }}" class="btn btn-warning">
+                        <i class="fa fa-shield"></i> Modération rapide
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ evenement.titre }}{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-8">
+        <h1 class="mb-3">{{ evenement.titre }}</h1>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <p class="card-text">
+                    <strong><i class="bi bi-calendar3"></i> Date :</strong> 
+                    {{ evenement.date|date('d/m/Y à H:i') }}
+                </p>
+                {% if evenement.lieu %}
+                <p class="card-text">
+                    <strong><i class="bi bi-geo-alt"></i> Lieu :</strong> 
+                    {{ evenement.lieu }}
+                </p>
+                {% endif %}
+                {% if evenement.description %}
+                <p class="card-text">
+                    <strong>Description :</strong><br>
+                    {{ evenement.description }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="mb-3">
+            <i class="bi bi-star-fill text-warning"></i> Avis 
+            <span class="badge bg-secondary">{{ avis_moderes|length }}</span>
+        </h2>
+
+        {% if avis_moderes is empty %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Aucun avis pour le moment. Soyez le premier à donner votre avis !
+            </div>
+        {% else %}
+            {% for avis in avis_moderes %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title">
+                                {{ avis.utilisateur.prenom }} {{ avis.utilisateur.nom }}
+                            </h5>
+                            <p class="text-warning mb-2">
+                                {% for i in 1..avis.note %}
+                                    ⭐
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <small class="text-muted">
+                            {{ avis.creerLe|date('d/m/Y') }}
+                            {% if avis.modifierLe %}
+                                <br>(modifié le {{ avis.modifierLe|date('d/m/Y') }})
+                            {% endif %}
+                        </small>
+                    </div>
+                    <p class="card-text">{{ avis.commentaire }}</p>
+                    
+                    {% if app.user and avis.utilisateur == app.user %}
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ path('app_avis_edit', {'id': avis.id}) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        <form method="post" 
+                              action="{{ path('app_avis_delete', {'id': avis.id}) }}" 
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avis ?');"
+                              style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avis.id) }}">
+                            <button class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        {% if app.user %}
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Donner mon avis</h5>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                    {{ form_row(form.note) }}
+                    {{ form_row(form.commentaire) }}
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send"></i> Publier mon avis
+                    </button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> 
+            <a href="{{ path('app_login') }}">Connectez-vous</a> pour donner votre avis sur cet événement.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

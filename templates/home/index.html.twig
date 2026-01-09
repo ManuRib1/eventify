@@ -1,0 +1,499 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Notation Événements{% endblock %}
+
+{% block body %}
+{# Hero Section Améliorée #}
+<div class="hero-section text-white text-center py-5 mb-5 position-relative overflow-hidden">
+    <div class="hero-overlay"></div>
+    <div class="container position-relative" style="z-index: 2;">
+        <h1 class="display-2 fw-bold mb-3 animate-fade-in">
+            <i class="bi bi-calendar-event"></i>
+             Relais & Châteaux
+
+        </h1>
+        <p class="lead mb-4" style="font-size: 1.4rem;">
+            <i class="bi bi-award"></i> Relais & Châteaux - Expériences d'Exception
+        </p>
+        
+        {% if not app.user %}
+        <div class="mb-3 animate-slide-up">
+            <a href="{{ path('app_login') }}" class="btn btn-light btn-lg me-3 px-5 shadow-lg hover-scale">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Se connecter
+            </a>
+            <a href="{{ path('app_register') }}" class="btn btn-outline-light btn-lg px-5 shadow hover-scale">
+                <i class="bi bi-person-plus me-2"></i> S'inscrire
+            </a>
+        </div>
+        {% else %}
+        <div class="alert alert-light d-inline-block shadow-lg animate-fade-in">
+            <i class="bi bi-person-circle fs-4"></i>
+            <span class="fs-5">Bienvenue, <strong>{{ app.user.prenom }} {{ app.user.nom }}</strong></span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Section Recherche et Filtres Améliorée #}
+<div class="container">
+    <div class="search-card shadow-lg border-0 mb-5">
+        <div class="card-body p-4" >
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">
+                    <i class="bi bi-search text-primary"></i> Trouvez votre événement idéal
+                </h3>
+                <p class="text-muted">Utilisez nos filtres pour affiner votre recherche</p>
+            </div>
+            
+            <form method="get" action="{{ path('app_home') }}" id="searchForm">
+                <div class="row g-3 align-items-end">
+                    {# Barre de recherche principale #}
+                    <div class="col-lg-5">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-search me-1"></i> Recherche
+                        </label>
+                        <div class="input-group input-group-lg search-input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search text-primary"></i>
+                            </span>
+                            <input type="text" 
+                                   name="search" 
+                                   class="form-control border-start-0" 
+                                   placeholder="Titre, description..."
+                                   value="{{ current_search }}"
+                                   id="searchInput">
+                        </div>
+                    </div>
+
+                    {# Filtre par lieu #}
+                    <div class="col-lg-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-geo-alt me-1"></i> Lieu
+                        </label>
+                        <select name="lieu" class="form-select form-select-lg custom-select" id="lieuSelect">
+                            <option value="">Tous les lieux</option>
+                            {% for lieu in lieux %}
+                                <option value="{{ lieu }}" {% if current_lieu == lieu %}selected{% endif %}>
+                                    {{ lieu }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Filtre par date #}
+                    <div class="col-lg-2">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-calendar3 me-1"></i> Date
+                        </label>
+                        <input type="date" 
+                               name="date_debut" 
+                               class="form-control form-control-lg custom-select" 
+                               value="{{ current_date }}"
+                               id="dateInput">
+                    </div>
+
+                    {# Bouton Filtrer #}
+                    <div class="col-lg-2">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm hover-scale">
+                            <i class="bi bi-funnel-fill me-1"></i> Filtrer
+                        </button>
+                    </div>
+                </div>
+
+                {# Indicateurs actifs et réinitialisation #}
+                {% if current_search or current_lieu or current_date %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <a href="{{ path('app_home') }}" class="btn btn-outline-danger shadow-sm">
+                                <i class="bi bi-x-circle me-1"></i> Réinitialiser
+                            </a>
+                            
+                            {% if current_search %}
+                            <span class="badge bg-primary fs-6 px-3 py-2">
+                                <i class="bi bi-search me-1"></i> "{{ current_search }}"
+                            </span>
+                            {% endif %}
+                            
+                            {% if current_lieu %}
+                            <span class="badge bg-info fs-6 px-3 py-2">
+                                <i class="bi bi-geo-alt me-1"></i> {{ current_lieu }}
+                            </span>
+                            {% endif %}
+                            
+                            {% if current_date %}
+                            <span class="badge bg-success fs-6 px-3 py-2">
+                                <i class="bi bi-calendar3 me-1"></i> Dès le {{ current_date|date('d/m/Y') }}
+                            </span>
+                            {% endif %}
+                            
+                            <span class="ms-auto text-muted fs-6">
+                                <i class="bi bi-check-circle text-success"></i> 
+                                <strong>{{ evenements|length }}</strong> événement(s)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    {# Section Titre des Résultats #}
+    <div class="text-center mb-5">
+        <h2 class="display-6 fw-bold mb-2">
+            {% if current_search or current_lieu or current_date %}
+                <i class="bi bi-filter-circle text-primary"></i> Résultats de recherche
+            {% else %}
+                <i class="bi bi-star-fill text-warning"></i> Événements à venir
+            {% endif %}
+        </h2>
+        <p class="text-muted fs-5">Découvrez nos expériences exceptionnelles</p>
+    </div>
+
+    {# Liste des Événements #}
+    {% if evenements is empty %}
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="no-results-card shadow-lg text-center p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-search fs-1 text-warning"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Aucun événement trouvé</h4>
+                    {% if current_search or current_lieu or current_date %}
+                        <p class="text-muted mb-4">
+                            Aucun événement ne correspond à vos critères. 
+                            Essayez de modifier vos filtres.
+                        </p>
+                        <a href="{{ path('app_home') }}" class="btn btn-primary btn-lg shadow hover-scale">
+                            <i class="bi bi-arrow-clockwise me-2"></i> Voir tous les événements
+                        </a>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            De nouveaux événements exceptionnels seront bientôt disponibles.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row g-4 mb-5">
+            {% for evenement in evenements %}
+            <div class="col-md-6 col-lg-4">
+                <div class="event-card h-100 shadow border-0">
+                    <div class="event-card-header">
+                        <div class="event-badge">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h5 class="event-title">
+                            {{ evenement.titre }}
+                        </h5>
+                    </div>
+                    
+                    <div class="card-body" style="padding: 30px!important">
+                        <div class="event-info mb-3">
+                            <div class="info-item">
+                                <i class="bi bi-calendar3 text-primary"></i>
+                                <span>{{ evenement.date|date('d/m/Y') }}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-clock text-primary"></i>
+                                <span>{{ evenement.date|date('H:i') }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if evenement.lieu %}
+                        <div class="event-location mb-3">
+                            <i class="bi bi-geo-alt-fill text-danger"></i>
+                            <span>{{ evenement.lieu }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if evenement.description %}
+                        <p class="event-description">
+                            {{ evenement.description|length > 100 ? evenement.description|slice(0, 100) ~ '...' : evenement.description }}
+                        </p>
+                        {% endif %}
+
+                        <div class="event-stats">
+                            {% set avis_count = evenement.avis|length %}
+                            {% set avis_acceptes = evenement.avis|filter(a => a.accepter)|length %}
+                            
+                            <span class="badge-custom badge-info">
+                                <i class="bi bi-chat-left-text"></i>
+                                {{ avis_acceptes }} avis
+                            </span>
+                            
+                            {% if avis_acceptes > 0 %}
+                                {% set total_notes = 0 %}
+                                {% for avis in evenement.avis %}
+                                    {% if avis.accepter %}
+                                        {% set total_notes = total_notes + avis.note %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% set moyenne = (total_notes / avis_acceptes)|round(1) %}
+                                
+                                <span class="badge-custom badge-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    {{ moyenne }}/5
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0 p-3">
+                        <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" 
+                           class="btn btn-primary w-100 btn-event shadow-sm">
+                            <i class="bi bi-eye me-2"></i> Voir les détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5 mb-5">
+            <a href="{{ path('app_evenement_index') }}" class="btn btn-outline-primary btn-lg px-5 shadow hover-scale">
+                <i class="bi bi-grid-3x3-gap me-2"></i> Voir tous les événements
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{# CSS Amélioré #}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 0 0 60px 60px;
+        position: relative;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"></path></svg>') no-repeat bottom;
+        background-size: cover;
+        opacity: 0.1;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+    
+    .animate-slide-up {
+        animation: slideUp 0.8s ease-out 0.3s both;
+    }
+    
+    /* Search Card */
+    .search-card {
+        border-radius: 20px;
+        background: white;
+        border: 2px solid #f0f0f0;
+    }
+    
+    .search-input-group .input-group-text {
+        border-right: none;
+        background: white;
+    }
+    
+    .search-input-group .form-control {
+        border-left: none;
+    }
+    
+    .search-input-group .form-control:focus {
+        box-shadow: none;
+        border-color: #ced4da;
+    }
+    
+    .custom-select {
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    }
+    
+    /* Event Cards */
+    .event-card {
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        background: white;
+        border: 2px solid #f8f9fa !important;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3) !important;
+        border-color: #667eea !important;
+    }
+    
+    .event-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .event-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.3);
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+    }
+    
+    .event-badge i {
+        font-size: 1.3rem;
+    }
+    
+    .event-title {
+        font-weight: 700;
+        margin: 0;
+        padding-right: 60px;
+    }
+    
+    .event-info {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .info-item i {
+        font-size: 1.1rem;
+    }
+    
+    .event-location {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        color: #6c757d;
+    }
+    
+    .event-location i {
+        font-size: 1.1rem;
+    }
+    
+    .event-description {
+        color: #6c757d;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .event-stats {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .badge-custom {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    
+    .badge-info {
+        background: #e7f3ff;
+        color: #0d6efd;
+    }
+    
+    .badge-warning {
+        background: #fff3cd;
+        color: #997404;
+    }
+    
+    .btn-event {
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-event:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* No Results Card */
+    .no-results-card {
+        border-radius: 25px;
+        background: white;
+        border: 3px dashed #dee2e6;
+    }
+    
+    /* Buttons */
+    .hover-scale {
+        transition: all 0.3s ease;
+    }
+    
+    .hover-scale:hover {
+        transform: scale(1.08);
+    }
+    
+    .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-section {
+            border-radius: 0 0 30px 30px;
+        }
+        
+        .display-2 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+
+<script>
+    // Soumettre automatiquement le formulaire quand on change les filtres
+    document.getElementById('lieuSelect').addEventListener('change', function() {
+        document.getElementById('searchForm').submit();
+    });
+
+    document.getElementById('dateInput').addEventListener('change', function() {
+        document.getElementById('searchForm').submit();
+    });
+</script>
+{% endblock %}

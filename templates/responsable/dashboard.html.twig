@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord Responsable{% endblock %}
+
+{% block body %}
+<h1 class="mb-4">
+    <i class="bi bi-speedometer2"></i> Tableau de bord Responsable
+</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-calendar-event"></i> Mes événements
+                </h5>
+                <p class="card-text display-4">{{ evenements|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-hourglass-split"></i> Avis en attente
+                </h5>
+                <p class="card-text display-4">
+                    {% set total_avis = 0 %}
+                    {% for evenement in evenements %}
+                        {% for avis in evenement.avis %}
+                            {% if not avis.accepter %}
+                                {% set total_avis = total_avis + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    {{ total_avis }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="mb-3">Mes événements</h2>
+
+{% if evenements is empty %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Vous n'êtes responsable d'aucun événement pour le moment.
+    </div>
+{% else %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Titre</th>
+                    <th>Date</th>
+                    <th>Lieu</th>
+                    <th>Avis publiés</th>
+                    <th>Avis en attente</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for evenement in evenements %}
+                <tr>
+                    <td>{{ evenement.titre }}</td>
+                    <td>{{ evenement.date|date('d/m/Y') }}</td>
+                    <td>{{ evenement.lieu ?? '-' }}</td>
+                    <td>
+                        {% set avis_moderes = 0 %}
+                        {% for avis in evenement.avis %}
+                            {% if avis.accepter %}
+                                {% set avis_moderes = avis_moderes + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        <span class="badge bg-success">{{ avis_moderes }}</span>
+                    </td>
+                    <td>
+                        {% set avis_en_attente = 0 %}
+                        {% for avis in evenement.avis %}
+                            {% if not avis.accepter %}
+                                {% set avis_en_attente = avis_en_attente + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        <span class="badge bg-warning text-dark">{{ avis_en_attente }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Voir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+{% endblock %}
