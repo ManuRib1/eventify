@@ -1,4 +1,5 @@
-# Système de Notation d'Événements - Relais & Châteaux
+# Système de Notation d'Événements - Eventify
+
 
 ## 📋 Description du projet
 
